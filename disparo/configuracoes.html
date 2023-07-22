@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Controle de Envio de Mensagens em Massa</title>
+    <link rel="stylesheet" type="text/css" href="styles.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/timepicker/1.3.5/jquery.timepicker.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/timepicker/1.3.5/jquery.timepicker.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+	
+    <!-- SweetAlert2 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.18/dist/sweetalert2.min.css">
+
+    <!-- SweetAlert2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.18/dist/sweetalert2.min.js"></script>
+    
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+    <!-- Bootstrap JS -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script src="monitoramento.js"></script>
+</head>
+
+<body class="custom-body">
+    <h1>Controle de Envio de Mensagens em Massa</h1>
+
+    <!-- Configurações de envio -->
+	<div class="configuracoes-section">
+		<h2>Configurações de Envio</h2>
+		<form method="post" action="salvar_configuracoes.php" id="form-configuracoes" class="form-buttons">
+			<label for="quantidade_por_dia">Quantidade de Mensagens por Dia:</label>
+			<input type="number" name="quantidade_por_dia" id="quantidade_por_dia" required step="5"><br>
+
+			<label for="hora_inicio">Hora de Início:</label>
+			<input type="text" name="hora_inicio" id="hora_inicio" class="timepicker" required><br>
+
+			<label for="hora_fim">Hora de Fim:</label>
+			<input type="text" name="hora_fim" id="hora_fim" class="timepicker" required><br>
+
+			<label for="intervalo_minimo">Intervalo Mínimo entre as Mensagens (em segundos):</label>
+			<input type="number" name="intervalo_minimo" id="intervalo_minimo" required><br>
+
+			<div class="button-container">
+			  <button type="submit" class="salvar-btn custom-btn" title="Cuidado! Isso salvará todas as configurações novas.">
+				<i class="fas fa-save icon"></i>
+				Salvar Configurações
+			  </button>
+			  <button type="button" class="rebobinar-btn custom-btn" title="Reagente todos os envios passados atrasados." name="action" value="rebobinar">
+				<i class="fas fa-backward icon"></i>
+				Rebobinar
+			  </button>
+			  <button type="button" class="avancar-btn custom-btn" title="Cuidado! Isso irá avançar todos os horários de envios pendentes." name="action" value="avancar">
+				<i class="fas fa-forward icon"></i>
+				Avançar
+			  </button>
+			  <button type="button" class="incluir-btn custom-btn" title="Inserir novos clientes na zona de ataque." name="novos" value="incluir-clientes">
+				<i class="fas fa-record-vinyl icon"></i>
+				Novos clientes
+			  </button>
+			  <button type="button" class="atacar-btn custom-btn" title="Atacar" name="atacar" value="atacar">
+				<i class="fas fa-play icon"></i>
+				Atacar
+			  </button>
+			</div>
+		</form>
+	</div>
+	
+	<!-- Informação do banco de dados. -->
+	<div id="info-banco">
+		<h2>Status do Banco de Dados</h2>
+	</div>
+
+	<!-- Monitoramento em tempo real -->
+	<div class="monitoramento-section">
+		<h2>Monitoramento em Tempo Real</h2>
+		<table id="tabela-monitoramento" class="custom-table">
+			<thead>
+				<tr>
+					<th>ID</th>
+					<th>Data</th>
+					<th>Nome</th>
+					<th>CNPJ</th>
+					<th>Número</th>
+					<th>Mensagem</th>
+					<th>Enviado</th>
+				</tr>
+			</thead>
+			<tbody>
+				<!-- Aqui serão inseridas as linhas da tabela dinamicamente -->
+			</tbody>
+		</table>
+	</div>
+
+
+    <script src="envio_mensagens.js"></script>
+    <script src="configuracoes.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('.timepicker').timepicker({
+                timeFormat: 'HH:mm',
+                interval: 15,
+                minTime: '00:00',
+                maxTime: '23:45',
+                defaultTime: '08:00',
+                startTime: '00:00',
+                dynamic: false,
+                dropdown: true,
+                scrollbar: true
+            });
+        });
+    </script>
+</body>
+</html>
