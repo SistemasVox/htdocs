@@ -18,7 +18,10 @@ function atualizarTabela() {
                 newRow.append('<td>' + log.nome + '</td>');
                 newRow.append('<td>' + log.cnpj + '</td>');
                 newRow.append('<td>' + log.numero + '</td>');
-                newRow.append('<td>' + log.mensagem + '</td>');
+
+                // Verifica se há uma mensagem associada a esse log
+                var mensagem = log.id_mensagem !== null ? log.id_mensagem : 'Sem mensagem';
+                newRow.append('<td>' + mensagem + '</td>');
 
                 // Modifica o campo "enviado" para exibir "Sim" ou "Não"
                 var enviado = log.enviado === '1' || log.enviado === 1 ? 'Sim' : 'Não';
@@ -34,6 +37,8 @@ function atualizarTabela() {
         }
     });
 }
+
+
 
 // Função para atualizar as informações do status do banco de dados
 function atualizarStatusBanco() {

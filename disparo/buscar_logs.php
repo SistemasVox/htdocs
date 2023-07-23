@@ -37,7 +37,7 @@ function conectarBancoDados($host, $dbName, $username, $password) {
 }
 function atualizarRegistro($conn, $id, $nome, $cnpj, $numero, $mensagem, $enviado) {
     try {
-        $sql = "UPDATE logs_envio SET nome = :nome, cnpj = :cnpj, numero = :numero, mensagem = :mensagem, enviado = :enviado WHERE id = :id";
+        $sql = "UPDATE logs_envio SET nome = :nome, cnpj = :cnpj, numero = :numero, id_mensagem = :mensagem, enviado = :enviado WHERE id = :id";
         $stmt = $conn->prepare($sql);
         $stmt->bindParam(":nome", $nome);
         $stmt->bindParam(":cnpj", $cnpj);
@@ -173,27 +173,33 @@ function verificarStatus($conn) {
     try {
         $status = [];
         $status[] = formatarDataHora(json_decode(getDataServidor($conn))->message);
-        // Consulta para obter informações sobre o status do banco de Logs
+        
+        // Consultar o status das mensagens diretamente no banco de dados
         $statusMensagens = consultarStatusMensagens($conn);
-        if ($row['rebobinar_count'] > 0) {
+
+        if ($statusMensagens['rebobinar_count'] > 0) {
             $status[] = "Banco de Logs precisa ser rebobinado";
-            $status[] = "Quantidade de logs a serem rebobinados: " . $row['rebobinar_count'];
+            $status[] = "Quantidade de logs a serem rebobinados: " . $statusMensagens['rebobinar_count'];
         }
-        if ($row['enviar_count'] > 0) {
+
+        if ($statusMensagens['enviar_count'] > 0) {
             $status[] = "Banco de Logs possui mensagens na fila de envio e pode ser avançado";
-            $status[] = "Quantidade de clientes enviando mensagens: " . $row['enviar_count'];
+            $status[] = "Quantidade de clientes enviando mensagens: " . $statusMensagens['enviar_count'];
             // Calcular quanto tempo falta para a próxima mensagem ser enviada
             $agora = new DateTime();
-            $proximoEnvio = new DateTime($row['proximo_envio']);
+            $proximoEnvio = new DateTime($statusMensagens['proximo_envio']);
             $diferenca = $agora->diff($proximoEnvio);
             $status[] = "Tempo restante para a próxima mensagem ser enviada: " . $diferenca->format('%H:%I:%S');
         }
-        if ($row['total_idle_logs'] == 0) {
+
+        if ($statusMensagens['total_idle_logs'] == 0) {
             $status[] = "Banco de Logs está ocioso";
         }
-        if ($row['enviado_count'] > 0) {
-            $status[] = "Mensagens enviadas com sucesso: " . $row['enviado_count'];
+
+        if ($statusMensagens['enviado_count'] > 0) {
+            $status[] = "Mensagens enviadas com sucesso: " . $statusMensagens['enviado_count'];
         }
+
         // Consulta para obter a quantidade de novos Logs aguardando
         $sqlClientesEmEspera = "SELECT COUNT(*) AS total
                                 FROM clientes c
@@ -201,16 +207,17 @@ function verificarStatus($conn) {
                                     SELECT 1 FROM logs_envio l WHERE l.cnpj = c.cnpj
                                 )";
         $stmtClientesEmEspera = $conn->query($sqlClientesEmEspera);
-        $totalClientesEmEspera = $stmtClientesEmEspera->fetch(PDO::FETCH_ASSOC) ["total"];
+        $totalClientesEmEspera = $stmtClientesEmEspera->fetch(PDO::FETCH_ASSOC)["total"];
         if ($totalClientesEmEspera > 0) {
             $status[] = "Quantidade de novos clientes aguardando: " . $totalClientesEmEspera;
         }
+
         return json_encode(['status' => $status]);
-    }
-    catch(PDOException $e) {
-        return json_encode(["success" => false, "message" => "Erro ao verificar o status do banco de dados: " . $e->getMessage() ]);
+    } catch (PDOException $e) {
+        return json_encode(["success" => false, "message" => "Erro ao verificar o status do banco de dados: " . $e->getMessage()]);
     }
 }
+
 function consultarWhatsApp($numero) {
     // Montar os dados para a requisição POST
     $data = array('tel' => $numero);
@@ -338,6 +345,21 @@ function getQuantidadeEMensagensServicos($conn, $idServico) {
         'mensagens' => $mensagens
     );
 }
+
+function getMensagemAleatoriaServico($conn, $idServico) {
+    $sql = "SELECT id FROM Mensagem m
+            INNER JOIN MensagemServico ms ON m.id = ms.id_mensagem
+            WHERE ms.id_servico = :idServico
+            ORDER BY RAND()
+            LIMIT 1";
+
+    $stmt = $conn->prepare($sql);
+    $stmt->bindParam(":idServico", $idServico, PDO::PARAM_INT);
+    $stmt->execute();
+
+    return $stmt->fetch(PDO::FETCH_ASSOC)['id'];
+}
+
 function atacar($conn) {
     $servicos = $_POST["servicos"];
     $dadosServicos = array();
@@ -361,17 +383,14 @@ function atacar($conn) {
 
         // Verificar se a quantidade de mensagens relacionadas a esse serviço é maior que zero
         if ($dadosServico['quantidade'] > 0) {
-            $dadosServico['id'] = $idServico;
-            $dadosServicos[] = $dadosServico;
+            // Obter o ID da mensagem aleatória para associar ao serviço
+            $idMensagem = getMensagemAleatoriaServico($conn, $idServico);
+            if ($idMensagem) {
+                $dadosServico['id'] = $idServico;
+                $dadosServico['mensagem'] = $idMensagem;
+                $dadosServicos[] = $dadosServico;
+            }
         }
-    }
-
-    // Construir a string de resposta com os dados dos serviços
-    $responseString = '';
-    foreach ($dadosServicos as $dadosServico) {
-        $responseString .= 'Serviço ID: ' . $dadosServico['id'] . ', ';
-        $responseString .= 'Quantidade de Mensagens: ' . $dadosServico['quantidade'] . ', ';
-        $responseString .= 'Mensagens: ' . implode(', ', $dadosServico['mensagens']) . '<br>';
     }
 
     // Verificar se a quantidade de mensagens relacionadas aos serviços é maior que zero
@@ -379,10 +398,40 @@ function atacar($conn) {
         return json_encode(["success" => false, "message" => "A quantidade de mensagens relacionadas ao serviço selecionado é zero."]);
     }
 
-    return json_encode(["success" => true, "message" => $responseString]);
+    // Atualizar as mensagens na tabela logs_envio
+    $atualizacoesRealizadas = 0;
+    $stmtVerificarAtualizacao = $conn->prepare("SELECT COUNT(*) AS total FROM logs_envio WHERE (id_mensagem IS NULL OR id_mensagem = '' OR id_mensagem = '0');");
+    $stmtVerificarAtualizacao->execute();
+    $totalMensagensAtualizaveis = $stmtVerificarAtualizacao->fetch(PDO::FETCH_ASSOC)["total"];
+
+    if ($totalMensagensAtualizaveis > 0) {
+        $stmtAtualizarMensagens = $conn->prepare("UPDATE logs_envio SET id_mensagem = :id_mensagem WHERE (id_mensagem IS NULL OR id_mensagem = '' OR id_mensagem = '0');");
+        foreach ($dadosServicos as $dadosServico) {
+            $idMensagem = $dadosServico['mensagem']; // Utilizando o ID da mensagem obtido acima
+            $stmtAtualizarMensagens->bindParam(':id_mensagem', $idMensagem, PDO::PARAM_INT);
+            if ($stmtAtualizarMensagens->execute()) {
+                $atualizacoesRealizadas++;
+            }
+        }
+    }
+
+    if ($atualizacoesRealizadas === 0) {
+        return json_encode(["success" => false, "message" => "Não há mensagens para atualizar em logs_envio."]);
+    }
+
+    return json_encode(["success" => true, "message" => "Foram atualizadas $atualizacoesRealizadas mensagens em logs_envio."]);
 }
-
-
+function buscarLogs($conn) {
+    try {
+        // Consulta para buscar os logs ordenados pela data mais próxima da hora atual
+        $sql = "SELECT * FROM logs_envio ORDER BY enviado ASC, ABS(TIMESTAMPDIFF(SECOND, hora, NOW())) ASC";
+        $stmt = $conn->query($sql);
+        $logs = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return json_encode(['logs' => $logs]);
+    } catch (PDOException $e) {
+        return json_encode(["success" => false, "message" => "Erro ao buscar os logs: " . $e->getMessage()]);
+    }
+}
 
 try {
     $conn = conectarBancoDados($host, $dbName, $username, $password);
@@ -418,14 +467,7 @@ try {
         echo getDataServidor($conn);
     } elseif ($_SERVER["REQUEST_METHOD"] === "GET" && isset($_GET["action"]) && $_GET["action"] === "logs") {
         // Consulta para buscar os logs ordenados pela data mais próxima da hora atual
-        $sql = "SELECT * FROM logs_envio ORDER BY enviado ASC, ABS(TIMESTAMPDIFF(SECOND, hora, NOW())) ASC";
-        $stmt = $conn->query($sql);
-        $logs = [];
-        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $logs[] = $row;
-        }
-        // Retorna os logs em formato JSON
-        echo json_encode(['logs' => $logs]);
+        echo buscarLogs($conn);
     } elseif ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["action"]) && $_POST["action"] === "atualizar") {
         // Obtenha os dados do POST
         $id = $_POST["id"];

@@ -35,4 +35,6 @@ $proximaDataHora = gerarProximaDataHoraDisponivel($dataInicio, $horaInicio, $hor
 // Imprimir a próxima data e hora disponível
 echo "Próxima data e hora disponível: " . $proximaDataHora; */
 
+echo buscarLogs($conn);
+
 ?>
