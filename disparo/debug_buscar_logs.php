@@ -24,17 +24,20 @@ echo json_decode(getDataServidor($conn))->message. ".<br>"; */
 
 /* echo getServicos($conn); */
 
-/* // Definir os valores de entrada
-$dataInicio = '2023-07-18';
+// Definir os valores de entrada
+$dataInicio = '2023-07-24';
 $horaInicio = '09:00';
 $horaFim = '17:00';
+
+$dataInicio = extrairDataDeRespostaJson(getDataServidor($conn));
+echo "Data Início: " . $dataInicio . "<br>";
 
 // Chamar a função para obter a próxima data e hora disponível
 $proximaDataHora = gerarProximaDataHoraDisponivel($dataInicio, $horaInicio, $horaFim);
 
 // Imprimir a próxima data e hora disponível
-echo "Próxima data e hora disponível: " . $proximaDataHora; */
+echo "Próxima data e hora disponível: " . $proximaDataHora;
 
-echo buscarLogs($conn);
+/* echo buscarLogs($conn); */
 
 ?>
