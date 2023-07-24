@@ -1,0 +1,32 @@
+/* styles.css */
+
+body {
+    background-color: #212529;
+    color: #fff;
+}
+
+.container {
+    padding: 20px;
+}
+
+.form-section {
+    background-color: #343a40;
+    padding: 20px;
+    border-radius: 8px;
+}
+
+h1 {
+    color: #ffc107;
+    margin-bottom: 20px;
+}
+
+label,
+.btn {
+    color: #fff;
+}
+
+.form-control {
+    background-color: #495057;
+    color: #fff;
+    border: none;
+}

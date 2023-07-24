@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>CRUD MensagemServico</title>
+    <!-- Adicionar os links de CDN do Bootstrap, Axios e SweetAlert2 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="section">
+            <h1>Associar Mensagem a Serviço</h1>
+            <form class="form-section" id="associarForm">
+                <div class="mb-3">
+                    <label for="mensagemSelect" class="form-label">Mensagem:</label>
+                    <select class="form-control" id="mensagemSelect" required></select>
+                </div>
+
+                <div class="mb-3">
+                    <label for="servicoSelect" class="form-label">Serviço:</label>
+                    <select class="form-control" id="servicoSelect" required></select>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Associar</button>
+            </form>
+        </div>
+
+        <!-- Tabela com informações das tabelas -->
+        <div class="section">
+            <h1>Status das Tabelas</h1>
+            <table class="table table-dark table-striped">
+                <thead>
+                    <tr>
+                        <th>Tabela</th>
+                        <th>Total</th>
+                        <th>Sem Associação</th>
+                        <th>Com Associação</th>
+                    </tr>
+                </thead>
+                <tbody id="tabelaStatus">
+                    <!-- Aqui serão inseridos os dados das tabelas por meio do JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Tabela com informações das associações de mensagem e serviço -->
+        <div class="section">
+            <h1>Associações de Mensagem e Serviço</h1>
+            <table class="table table-dark table-striped" id="mensagemServicoTable">
+                <!-- Aqui serão inseridas as informações das associações por meio do JavaScript -->
+            </table>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

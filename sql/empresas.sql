@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Tempo de geração: 22/07/2023 às 21:03
+-- Tempo de geração: 24/07/2023 às 03:32
 -- Versão do servidor: 10.4.28-MariaDB
 -- Versão do PHP: 8.2.4
 
@@ -32,16 +32,6 @@ CREATE TABLE `clientes` (
   `cnpj` varchar(14) DEFAULT NULL,
   `contato` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
-
---
--- Despejando dados para a tabela `clientes`
---
-
-INSERT INTO `clientes` (`nome`, `cnpj`, `contato`) VALUES
-('FARLI GAS', '36244590000145', '34 91760750'),
-('JESSICA GAS', '37621368000187', '34 99716283'),
-('JR GAS E AGUA', '41389899000163', '19 82845399'),
-('AGAS COMERCIO E TRANSPORTE DE GAS E AGUA', '33282533000162', '34 32369708');
 
 -- --------------------------------------------------------
 
@@ -75,19 +65,10 @@ CREATE TABLE `logs_envio` (
   `nome` varchar(255) DEFAULT NULL,
   `cnpj` varchar(14) NOT NULL,
   `numero` varchar(13) DEFAULT NULL,
-  `mensagem` varchar(255) DEFAULT NULL,
+  `id_mensagem` int(11) DEFAULT NULL,
   `hora` timestamp NOT NULL DEFAULT current_timestamp(),
   `enviado` tinyint(1) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
-
---
--- Despejando dados para a tabela `logs_envio`
---
-
-INSERT INTO `logs_envio` (`id`, `nome`, `cnpj`, `numero`, `mensagem`, `hora`, `enviado`) VALUES
-(1, 'FARLI GAS', '36244590000145', '34991760750', NULL, '2023-07-24 14:06:34', 0),
-(2, 'JESSICA GAS', '37621368000187', '34999716283', NULL, '2023-07-24 18:15:52', 0),
-(3, 'JR GAS E AGUA', '41389899000163', '19982845399', NULL, '2023-07-24 17:53:19', 0);
 
 -- --------------------------------------------------------
 
@@ -158,7 +139,71 @@ INSERT INTO `mensagemservico` (`id_mensagem`, `id_servico`) VALUES
 (2, 1),
 (2, 2),
 (3, 1),
-(3, 2);
+(3, 2),
+(4, 2),
+(4, 1),
+(5, 1),
+(5, 2),
+(6, 2),
+(6, 1),
+(7, 2),
+(7, 1),
+(8, 1),
+(8, 2),
+(9, 1),
+(9, 2),
+(10, 1),
+(10, 2),
+(11, 1),
+(11, 2),
+(12, 1),
+(12, 2),
+(13, 1),
+(13, 2),
+(14, 1),
+(14, 2),
+(15, 1),
+(15, 2),
+(16, 1),
+(16, 2),
+(17, 1),
+(17, 2),
+(18, 1),
+(18, 2),
+(19, 1),
+(19, 2),
+(20, 1),
+(20, 2),
+(26, 1),
+(26, 2),
+(26, 4),
+(27, 1),
+(27, 2),
+(27, 4),
+(28, 1),
+(28, 2),
+(28, 4),
+(29, 1),
+(29, 2),
+(29, 4),
+(30, 1),
+(30, 2),
+(30, 4),
+(31, 1),
+(31, 2),
+(31, 4),
+(32, 1),
+(32, 2),
+(32, 4),
+(33, 1),
+(33, 2),
+(33, 4),
+(34, 1),
+(34, 2),
+(34, 4),
+(35, 1),
+(35, 2),
+(35, 4);
 
 -- --------------------------------------------------------
 
@@ -212,7 +257,7 @@ ALTER TABLE `configuracoes`
 -- AUTO_INCREMENT de tabela `logs_envio`
 --
 ALTER TABLE `logs_envio`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
