@@ -108,56 +108,78 @@ function gerarProximaDataHoraDisponivel($dataInicio, $horaInicio, $horaFim) {
 	$proximaDataHoraDisponivel->setTimezone($dataAtual->getTimezone()); // Ajustar o fuso horário
 	return $proximaDataHoraDisponivel->format("Y-m-d H:i:s");
 }
-function ajustarDataEnvio($conn, $horaInicio, $horaFim, $intervaloMinimo, $acao) {
-	try {
-		// Obtenha a data e a hora do servidor de banco de dados
-		$dataServidor       = extrairDataDeRespostaJson(getDataServidor($conn));
 
-		$sql                = $acao === "rebobinar" ? "SELECT * FROM logs_envio WHERE enviado = 0 AND hora <= NOW()" : "SELECT * FROM logs_envio WHERE enviado = 0 AND hora > NOW()";
-		$stmt               = $conn->query($sql);
-		$logsParaAjustar    = $stmt->fetchAll(PDO::FETCH_ASSOC);
-		$numLogsParaAjustar = count($logsParaAjustar);
-		if ($numLogsParaAjustar == 0) {
-			$message            = $acao === "rebobinar" ? "Não foi necessário rebobinar, nenhum log atrasado encontrado." : "Não foi necessário avançar, nenhum log encontrado.";
-			return json_encode(["success"            => true, "message"            => $message]);
-		}
+// Função para ajustar a data de envio dos logs
+function ajustarDataEnvio($conn, $horaInicio, $horaFim, $intervaloMinimo, $acao, $quantidade_por_dia) {
+    try {
+        // Obter a data atual do servidor
+        $dataServidor = extrairDataDeRespostaJson(getDataServidor($conn));
+        // Escolha do SQL com base na ação passada
+        $sql = $acao === "rebobinar" ? "SELECT * FROM logs_envio WHERE enviado = 0 AND hora <= NOW()" : "SELECT * FROM logs_envio WHERE enviado = 0 AND hora > NOW()";
+        $stmt = $conn->query($sql);
+        // Obter os logs que precisam ter sua data de envio ajustada
+        $logsParaAjustar = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $numLogsParaAjustar = count($logsParaAjustar);
 
-		// Use a data e a hora do servidor de banco de dados aqui
-		$dataAtual  = new DateTime($dataServidor);
-		$dataInicio = $dataAtual->format("Y-m-d");
-		$datas      = [];
-		$tentativas = 0;
-		while (count($datas) < $numLogsParaAjustar) {
-			$dataEnvio  = gerarProximaDataHoraDisponivel($dataInicio, $horaInicio, $horaFim);
-			if (empty($datas) || abs(strtotime(end($datas)) - strtotime($dataEnvio)) >= $intervaloMinimo) {
-				$datas[]            = $dataEnvio;
-			}
-			else {
-				$tentativas++;
-			}
-			if ($tentativas >= 100) {
-				$dataInicio = date("Y-m-d", strtotime($dataInicio . " +1 day"));
-				$tentativas = 0;
-			}
-		}
-		// Embaralha as datas para distribuí-las aleatoriamente
-		shuffle($datas);
-		// Loop para atualizar os logs
-		foreach ($logsParaAjustar as $key        => $row) {
-			$id         = $row["id"];
-			$dataEnvio  = array_pop($datas);
-			$sqlUpdate  = "UPDATE logs_envio SET hora = :dataEnvio WHERE id = :id";
-			$stmtUpdate = $conn->prepare($sqlUpdate);
-			$stmtUpdate->bindParam(":dataEnvio", $dataEnvio);
-			$stmtUpdate->bindParam(":id", $id);
-			$stmtUpdate->execute();
-		}
-		return json_encode(["success" => true, "message" => "Datas de envio atualizadas com sucesso!", ]);
-	}
-	catch(PDOException $e) {
-		return json_encode(["success"                 => false, "message"                 => "Erro ao atualizar as datas de envio: " . $e->getMessage() , ]);
-	}
+        // Caso não haja logs para ajustar, retorne uma mensagem
+        if ($numLogsParaAjustar == 0) {
+            $message = $acao === "rebobinar" ? "Não foi necessário rebobinar, nenhum log atrasado encontrado." : "Não foi necessário avançar, nenhum log encontrado.";
+            return json_encode(["success" => true, "message" => $message]);
+        }
+
+        // Inicializar variáveis para a lógica de ajuste de data
+        $dataAtual = new DateTime($dataServidor);
+        $dataInicio = $dataAtual->format("Y-m-d");
+        $datas = [];
+        $logsParaHoje = 0;
+        $tentativas = 0;
+
+        // Loop até que todas as datas de envio sejam geradas
+        while (count($datas) < $numLogsParaAjustar) {
+            // Avance para o próximo dia se a quantidade por dia foi alcançada ou se muitas tentativas foram feitas
+            if ($logsParaHoje >= $quantidade_por_dia || $tentativas >= 100) {
+                $dataInicio = date("Y-m-d", strtotime($dataInicio . " +1 day"));
+                $logsParaHoje = 0;
+                $tentativas = 0;
+            }
+
+            // Gerar a próxima data e hora disponíveis para o envio
+            $dataEnvio = gerarProximaDataHoraDisponivel($dataInicio, $horaInicio, $horaFim);
+
+            // Adicione a data de envio se o intervalo mínimo for respeitado
+            if (empty($datas) || abs(strtotime(end($datas)) - strtotime($dataEnvio)) >= $intervaloMinimo * 60) {
+                $datas[] = $dataEnvio;
+                $logsParaHoje++;
+                $tentativas = 0;
+            } else {
+                // Incrementar a contagem de tentativas se o intervalo mínimo não for respeitado
+                $tentativas++;
+            }
+        }
+
+        // Embaralhar as datas para que sejam distribuídas aleatoriamente
+        shuffle($datas);
+
+        // Atualizar a data de envio de cada log
+        foreach ($logsParaAjustar as $key => $row) {
+            $id = $row["id"];
+            $dataEnvio = array_pop($datas);
+            $sqlUpdate = "UPDATE logs_envio SET hora = :dataEnvio WHERE id = :id";
+            $stmtUpdate = $conn->prepare($sqlUpdate);
+            $stmtUpdate->bindParam(":dataEnvio", $dataEnvio);
+            $stmtUpdate->bindParam(":id", $id);
+            $stmtUpdate->execute();
+        }
+
+        // Retornar um sucesso se tudo correr bem
+        return json_encode(["success" => true, "message" => "Datas de envio atualizadas com sucesso!", ]);
+    }
+    catch(PDOException $e) {
+        // Retornar um erro se algo der errado
+        return json_encode(["success" => false, "message" => "Erro ao atualizar as datas de envio: " . $e->getMessage() , ]);
+    }
 }
+
 function buscarClientesSemLogs($conn) {
 	try {
 		$sql             = "SELECT c.nome, c.cnpj, c.contato FROM clientes c LEFT JOIN logs_envio l ON c.cnpj = l.cnpj WHERE l.cnpj IS NULL";
@@ -268,6 +290,7 @@ function consultarWhatsApp($numero) {
 		return false;
 	}
 }
+
 function adicionarCliente($conn) {
 	try {
 		// Recupere todos os clientes
@@ -420,16 +443,17 @@ try {
 	}
 	elseif ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["action"])) {
 		// Obtenha os dados do POST
-		$horaInicio      = $_POST["hora_inicio"];
-		$horaFim         = $_POST["hora_fim"];
+		$horaInicio = $_POST["hora_inicio"];
+		$horaFim = $_POST["hora_fim"];
 		$intervaloMinimo = $_POST["intervalo_minimo"];
+		$quantidadePorDia = $_POST["quantidade_por_dia"];
 		if ($_POST["action"] === "rebobinar") {
 			// Rebobine a data de envio dos logs
-			echo ajustarDataEnvio($conn, $horaInicio, $horaFim, $intervaloMinimo, "rebobinar");
+			echo ajustarDataEnvio($conn, $horaInicio, $horaFim, $intervaloMinimo, "rebobinar", $quantidadePorDia);
 		}
 		elseif ($_POST["action"] === "avancar") {
 			// Avance a data de envio dos logs
-			echo ajustarDataEnvio($conn, $horaInicio, $horaFim, $intervaloMinimo, "avançar");
+			echo ajustarDataEnvio($conn, $horaInicio, $horaFim, $intervaloMinimo, "avancar", $quantidadePorDia);
 		}
 	}
 	elseif ($_SERVER["REQUEST_METHOD"] === "GET" && isset($_GET["action"]) && $_GET["action"] === "clientes-sem-logs") {
