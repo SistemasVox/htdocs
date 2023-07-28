@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta http-equiv='cache-control' content='no-cache'>
+    <meta http-equiv='expires' content='0'>
+    <meta http-equiv='pragma' content='no-cache'>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+    <!-- Additional CSS -->    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/timepicker/1.3.5/jquery.timepicker.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+
+    <!-- SweetAlert2 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.18/dist/sweetalert2.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" type="text/css" href="style.css">
+	
+    <title>Lotofácil</title>
+</head>
+<body>
+	<div class="container-fluid">
+		<h1 class="text-center my-4" id="titulo">Lotofácil</h1>
+		
+		<!-- Seção "bolas" -->
+		<div class="d-flex justify-content-center">
+			<section id="bolas" class="grid-container">
+			</section>
+		</div>
+		
+		<!-- Seção "infoJogo" -->
+		<div class="row">
+			<section id="infoJogo" class="text-left">
+				<div>
+					<span id="id_dez">Dezena:</span><br>
+					<span id="id_seq">Sequência:</span><br>
+					<span id="id_fim">Final:</span><br>
+					<span id="id_res">Resumo: D0: <span class="valor-D0"></span>, D1: <span class="valor-D1"></span>, D2: <span class="valor-D2"></span>, SEQ: <span class="valor-Seq"></span>, FIM: <span class="valor-Fim"></span>.</span>
+				</div>
+			</section>
+		</div>        
+        <!-- Seção "botões" -->
+        <div class="row">
+            <section id="buttons" class="text-center my-3">
+                <button class="btn btn-primary" onclick="gerarRandomico()">Gerar Randômico</button>
+                <button class="btn btn-secondary" onclick="copyClipboard()">Copiar Jogo</button>
+            </section>
+        </div>
+        
+		<!-- Seção "radiobuttons" -->
+		<div class="row">
+			<section id="radiobuttons" class="d-flex justify-content-start my-3">
+				<!-- Radio buttons serão adicionados aqui -->
+			</section>
+		</div>
+		
+		<section id="databaseInfo" class="limit-width">
+			<h2>Informação do Banco de Dados</h2>
+			<div>
+				<h3>Total de Jogos no Banco</h3>
+				<p id="totalJogos"></p>
+			</div>
+			<div>
+				<h3>Último Concurso</h3>
+				<p id="ultimoConcurso"></p>
+			</div>
+			<!-- Estatísticas de Todos os Jogos -->
+			<div>
+				<h3>Estatísticas de Todos os Jogos</h3>
+				<p><strong>D0 Mais Comum:</strong></p>
+				<pre id="d0MaisComum"></pre>
+				<p><strong>D1 Mais Comum:</strong></p>
+				<pre id="d1MaisComum"></pre>
+				<p><strong>D2 Mais Comum:</strong></p>
+				<pre id="d2MaisComum"></pre>
+				<p><strong>Sequência Mais Comum:</strong></p>
+				<pre id="sequenciaMaisComum"></pre>
+				<p><strong>Finais Repetidos:</strong></p>
+				<pre id="FinaisRepetidosMaisComuns"></pre>
+				<p><strong>Finais Mais Comuns:</strong></p>
+				<pre id="finaisMaisComuns"></pre>
+			</div>		
+			<div>
+				<h3>Números Mais Frequentes</h3>
+				<ul id="mostFrequentNumbers">
+					<!-- Números mais frequentes serão populados aqui -->
+				</ul>
+			</div>
+			<div>
+				<h3>Números Menos Frequentes</h3>
+				<ul id="leastFrequentNumbers">
+					<!-- Números menos frequentes serão populados aqui -->
+				</ul>
+			</div>
+			<div>
+				<h3>Intervalo de Números</h3>
+				<p><strong>Mínimo:</strong> <span id="minRange"></span></p>
+				<p><strong>Máximo:</strong> <span id="maxRange"></span></p>
+				<p><strong>Média:</strong> <span id="averageRange"></span></p>
+			</div>
+			<div>
+				<h3>Distribuição de Números Pares e Ímpares</h3>
+				<p><strong>Pares:</strong> <span id="evenCount"></span></p>
+				<p><strong>Ímpares:</strong> <span id="oddCount"></span></p>
+			</div>
+		</section>
+
+        
+        <!-- Seção "estatísticas" -->
+        <section id="estatisticas" class="limit-width">
+            <h2>Estatísticas</h2>
+            <div class="form-group">
+                <label for="statisticsType">Tipo de Estatísticas:</label>
+                <select id="statisticsType" class="form-control" onchange="updateStatistics()">
+                    <option value="all">Todos</option>
+                    <option value="par">Pares</option>
+                    <option value="impar">Ímpares</option>
+                </select>
+            </div>
+            <div>
+                <h3 id="statisticsTitle">Pares</h3>
+                <table id="statisticsTable" class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Número</th>
+                            <th>Frequência</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Rows will be populated here -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <!-- jQuery and Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/timepicker/1.3.5/jquery.timepicker.min.js"></script>
+
+    <!-- SweetAlert2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.18/dist/sweetalert2.min.js"></script>
+
+    <!-- Custom JS -->
+    <script type="text/javascript" src="script.js"></script>
+</body>
+
+</html>

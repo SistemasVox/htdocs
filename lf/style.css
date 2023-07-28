@@ -1,0 +1,298 @@
+/* Classes de bola */
+.bola, .bola-info {
+    color: #fff;
+    background-color: #188038;
+    text-align: center;
+    border: 5px solid green;
+    border-radius: 50%;
+    display: inline-block;
+    margin: 5px;
+}
+
+#infoJogo, #buttons, #estatisticas {
+    text-align: left;
+}
+
+.limit-width {
+    max-width: 50%; /* ou qualquer outro valor que você desejar */
+}
+/* 
+#infoJogo ol {
+    padding-left: 80px; /* Altere este valor conforme necessário */
+} */
+
+/* Estilo para a div que contém o radio button e a label */
+#radiobuttons .form-check {
+    padding: 10px;
+    margin: 10px;
+    font-size: 20px; /* Aumenta o tamanho da fonte */
+    border: 1px solid #ccc; /* Adiciona uma borda */
+    border-radius: 5px; /* Adiciona bordas arredondadas */
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2); /* Adiciona uma sombra */
+    background-color: #f9f9f9; /* Adiciona uma cor de fundo */
+    transition: all 0.3s ease; /* Adiciona uma transição suave */
+}
+
+/* Estilo para os radio buttons */
+#radiobuttons .form-check input[type="radio"] {
+    margin-right: 10px; /* Adiciona um espaço à direita do radio button */
+    transform: scale(1.5); /* Aumenta o tamanho do radio button */
+}
+
+/* Estilo para a label dos radio buttons */
+#radiobuttons .form-check label {
+    color: #333; /* Altera a cor do texto */
+}
+
+/* Efeito hover (altera a cor de fundo e a sombra) */
+#radiobuttons .form-check:hover {
+    background-color: #f5f5f5;
+    box-shadow: 0 7px 20px rgba(0,0,0,0.2);
+}
+
+/* Efeito active (amortece o radio button quando pressionado) */
+#radiobuttons .form-check:active {
+    box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+}
+
+/* Define o tamanho da fonte com base no viewport */
+@media (max-width: 600px) {
+    .bola {
+        font-size: 1.5rem;
+    }
+    .bola-info {
+        font-size: 1.5rem;
+    }
+}
+@media (min-width: 601px) and (max-width: 900px) {
+    .bola {
+        font-size: 2rem;
+    }
+    .bola-info {
+        font-size: 2rem;
+    }
+}
+@media (min-width: 901px) {
+    .bola {
+        font-size: 2.5rem;
+    }
+    .bola-info {
+        font-size: 2.5rem;
+    }
+}
+
+/* Define o estilo do título e informações do jogo */
+#titulo {
+    color: black;
+    text-align: center;
+    font-size: 50px;
+}
+#infoJogo {
+    color: black;
+    text-align: left;
+    font-size: 50px;
+    white-space: nowrap;
+    margin-top: 60px;
+}
+
+/* Define o estilo do botão */
+button {
+    font-size: 60px;
+    border-radius: 5px;
+}
+
+/* Define o estilo do contêiner de bolas */
+#bolas {
+    display: grid;
+    justify-content: center;
+    align-items: center;
+    height: 200px;
+}
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 100px)); /* Define 5 colunas de 100px cada */
+    justify-content: center; /* Centraliza a grade horizontalmente */
+    gap: 10px;
+}
+
+/* Define o estilo dos botões */
+#buttons {
+    display: flex;
+    justify-content: flex-start;
+    margin-top: 30px;
+    margin-right: 10px;
+    margin-left: 5px;
+}
+#buttons button:not(:last-child) {
+    margin-right: 10px;
+}
+
+/* Estilizando os botões */
+button {
+    font-size: 24px;
+    padding: 10px 20px;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+/* Botão primário (azul) */
+button.btn-primary {
+    background: linear-gradient(to right, #007bff, #66b2ff);
+}
+
+/* Botão secundário (cinza) */
+button.btn-secondary {
+    background: linear-gradient(to right, #6c757d, #a5a5a5);
+}
+
+/* Efeito hover (escurece a cor do botão) */
+button:hover {
+    transform: scale(1.02);
+    box-shadow: 0 7px 20px rgba(0,0,0,0.2);
+}
+
+/* Efeito active (amortece o botão quando pressionado) */
+button:active {
+    transform: scale(0.98);
+    box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+}
+
+/* Define o estilo da tabela de estatísticas */
+#estatisticas h2 {
+    text-align: center;
+    font-size: 1.5rem; /* Ajusta o tamanho do texto do cabeçalho h2 */
+}
+
+#estatisticas .form-group,
+#estatisticas table {
+    font-size: 1rem; /* Ajusta o tamanho do texto para a tabela e o grupo de formulários */
+}
+
+#estatisticas table {
+    margin-left: 0;
+    width: 100%; /* Garante que a tabela use toda a largura disponível */
+    border-spacing: 5px;
+}
+
+#estatisticas table th,
+#estatisticas table td {
+    padding: 0.5rem; /* Ajusta o preenchimento das células da tabela */
+}
+
+#estatisticas .form-control {
+    height: auto; /* Permite que o controle do formulário ajuste sua altura ao conteúdo */
+    padding: 0.5rem; /* Ajusta o preenchimento do controle do formulário */
+}
+
+#estatisticas tr:nth-child(even) {background: #CCC}
+#estatisticas tr:nth-child(odd) {background: #FFF}
+#estatisticas tr:hover {background-color: #f5f5f5;}
+
+
+table, td, th, tfoot {
+    border: solid 1px #000;
+    padding: 15px;
+    text-align: center;
+}
+th {
+    background-color: #999;
+}
+caption {
+    font-size: x-large;
+}
+colgroup {
+    background: #f60;
+}
+
+
+/* Estilos para a seção "Informação do Banco de Dados" */
+#databaseInfo {
+  margin-top: 30px;
+  padding: 20px;
+  background-color: #f8f8f8;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+#databaseInfo h2 {
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+#databaseInfo div {
+  margin-bottom: 30px;
+}
+
+#databaseInfo h3 {
+  font-size: 20px;
+  margin-bottom: 10px;
+}
+
+#databaseInfo p {
+  font-size: 16px;
+  margin-bottom: 5px;
+}
+
+#databaseInfo ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+#databaseInfo li {
+  font-size: 16px;
+  margin-bottom: 5px;
+}
+
+#databaseInfo strong {
+  font-weight: bold;
+}
+
+/* Estilos para a tabela de números mais e menos frequentes */
+#databaseInfo table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+#databaseInfo th,
+#databaseInfo td {
+  padding: 10px;
+  text-align: center;
+  border: 1px solid #ddd;
+}
+
+#databaseInfo th {
+  background-color: #f2f2f2;
+  font-weight: bold;
+}
+
+/* Estilos para as informações de números pares e ímpares */
+#databaseInfo p span {
+  font-weight: bold;
+  color: #007bff; /* Azul do Bootstrap - pode ajustar a cor conforme preferência */
+}
+
+/* Estilos para a seção "Informação do Banco de Dados" em telas menores */
+@media (max-width: 767.98px) {
+  #databaseInfo h2 {
+    font-size: 20px;
+  }
+
+  #databaseInfo h3 {
+    font-size: 18px;
+  }
+
+  #databaseInfo p,
+  #databaseInfo ul,
+  #databaseInfo li {
+    font-size: 14px;
+  }
+
+  #databaseInfo th,
+  #databaseInfo td {
+    padding: 5px;
+  }
+}
